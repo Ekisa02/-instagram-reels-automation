@@ -82,17 +82,14 @@ def validate_config():
 
     if not GROQ_API_KEY and not GEMINI_API_KEY:
         raise ValueError(
-            "Missing AI provider. Get a free key from:
-"
-            "  - Groq: https://console.groq.com (recommended, no CC)
-"
+            "Missing AI provider. Get a free key from:"
+            "  - Groq: https://console.groq.com (recommended, no CC)"
             "  - Gemini: https://aistudio.google.com/app/apikey"
         )
 
     if not R2_PUBLIC_URL and not os.getenv("CDN_BASE_URL"):
         raise ValueError(
-            "Missing public URL for video hosting. Use Cloudflare R2 (free):
-"
+            "Missing public URL for video hosting. Use Cloudflare R2 (free):"
             "  https://dash.cloudflare.com -> R2 -> Create bucket -> Allow public access"
         )
 
