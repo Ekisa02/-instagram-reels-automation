@@ -13,13 +13,12 @@ from src.config_free import (
 class R2Uploader:
     """
     Upload files to Cloudflare R2 (free tier: 10GB storage + 10M ops/month).
-
     Setup:
     1. Go to https://dash.cloudflare.com
     2. Sign up (free, no credit card needed)
     3. Go to R2 in sidebar -> Create bucket
     4. Settings -> Allow public access
-    5. Manage R2 API Tokens -> Create API Token (Object Read & Write)
+    5. Manage R2 API Tokens -> Create API Token (Object Read and Write)
     6. Copy Account ID, Access Key ID, Secret Access Key
     """
 
@@ -32,8 +31,7 @@ class R2Uploader:
 
         if not all([self.account_id, self.access_key, self.secret_key, self.bucket]):
             raise ValueError(
-                "Cloudflare R2 credentials missing. Get free credentials at:
-"
+                "Cloudflare R2 credentials missing. Get free credentials at: "
                 "https://dash.cloudflare.com -> R2 -> Manage API Tokens"
             )
 
@@ -85,7 +83,7 @@ class R2Uploader:
 
 
 class LocalDevUploader:
-    """Development fallback — copies to a local public directory."""
+    """Development fallback - copies to a local public directory."""
 
     def __init__(self, public_dir: str = "/tmp/reels-public"):
         self.public_dir = Path(public_dir)
@@ -108,7 +106,7 @@ def get_free_uploader():
         return R2Uploader()
     except Exception as e:
         logger.warning(f"R2 not configured: {e}")
-        logger.warning("Falling back to local uploader (won't work with Instagram API)")
+        logger.warning("Falling back to local uploader (wont work with Instagram API)")
         return LocalDevUploader()
 
 

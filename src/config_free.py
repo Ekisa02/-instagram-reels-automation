@@ -20,11 +20,11 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # ============================================================
 
 # Option 1: Groq (Free tier: 20 requests/min, 1,000,000 tokens/day)
-# Sign up: https://console.groq.com — Free, no credit card required
+# Sign up: https://console.groq.com - Free, no credit card required
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Option 2: Google Gemini (Free tier: 60 requests/min)
-# Sign up: https://aistudio.google.com/app/apikey — Free, no credit card required
+# Sign up: https://aistudio.google.com/app/apikey - Free, no credit card required
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Fallback priority: Groq -> Gemini -> None
@@ -44,7 +44,7 @@ INSTAGRAM_ACCOUNT_ID = os.getenv("INSTAGRAM_ACCOUNT_ID")
 FACEBOOK_PAGE_ID = os.getenv("FACEBOOK_PAGE_ID")
 
 # Cloudflare R2 (Free tier: 10GB storage, 10M Class A ops, 1M Class B ops/month)
-# Sign up: https://dash.cloudflare.com — Free, add R2 from sidebar
+# Sign up: https://dash.cloudflare.com - Free, add R2 from sidebar
 # Or use AWS S3 if you have credits. Otherwise R2 is the best free option.
 R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID")
 R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID")

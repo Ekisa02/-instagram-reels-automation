@@ -133,7 +133,6 @@ class InstagramPublisher:
     ) -> Optional[str]:
         """
         Wait for container processing to complete, then publish.
-
         Instagram needs time to download and process the video.
         """
         start_time = time.time()

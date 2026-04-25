@@ -15,7 +15,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from loguru import logger
 
+
 def setup_logging():
+    """Configure logging."""
     logger.add(
         "logs/reels_automation.log",
         rotation="10 MB",
@@ -24,15 +26,18 @@ def setup_logging():
         format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}"
     )
 
+
 def print_banner():
+    """Print startup banner."""
     banner = """
-╔═══════════════════════════════════════════════════════════════╗
-║           Instagram Reels AI Automation System                ║
-║                                                               ║
-║  Mode: --free (Zero Budget)  |  Paid APIs (default)          ║
-╚═══════════════════════════════════════════════════════════════╝
++===============================================================+
+|           Instagram Reels AI Automation System                |
+|                                                               |
+|  Mode: --free (Zero Budget)  |  Paid APIs (default)          |
++===============================================================+
     """
     print(banner)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -56,14 +61,39 @@ Examples:
         """
     )
 
-    parser.add_argument("--free", action="store_true", help="Use zero-budget free APIs (Groq, Edge-TTS, R2)")
-    parser.add_argument("--topic", "-t", type=str, help="Specific topic for the reel")
-    parser.add_argument("--style", "-s", type=str, default="educational", choices=["educational", "motivational", "storytelling", "trending"])
-    parser.add_argument("--dry-run", "-d", action="store_true", help="Create video but skip publishing")
-    parser.add_argument("--daily", action="store_true", help="Run continuously and post daily")
-    parser.add_argument("--time", type=str, default="09:00", help="Posting time for daily mode (HH:MM)")
-    parser.add_argument("--setup", action="store_true", help="Show setup instructions and exit")
-    parser.add_argument("--validate", action="store_true", help="Validate configuration and exit")
+    parser.add_argument(
+        "--free", action="store_true",
+        help="Use zero-budget free APIs (Groq, Edge-TTS, R2)"
+    )
+    parser.add_argument(
+        "--topic", "-t", type=str,
+        help="Specific topic for the reel"
+    )
+    parser.add_argument(
+        "--style", "-s", type=str, default="educational",
+        choices=["educational", "motivational", "storytelling", "trending"],
+        help="Content style"
+    )
+    parser.add_argument(
+        "--dry-run", "-d", action="store_true",
+        help="Create video but skip publishing"
+    )
+    parser.add_argument(
+        "--daily", action="store_true",
+        help="Run continuously and post daily"
+    )
+    parser.add_argument(
+        "--time", type=str, default="09:00",
+        help="Posting time for daily mode (HH:MM, 24h format)"
+    )
+    parser.add_argument(
+        "--setup", action="store_true",
+        help="Show setup instructions and exit"
+    )
+    parser.add_argument(
+        "--validate", action="store_true",
+        help="Validate configuration and exit"
+    )
 
     args = parser.parse_args()
 
@@ -77,7 +107,6 @@ Examples:
     print_banner()
     setup_logging()
 
-    # Choose mode
     if args.free:
         run_free_mode(args)
     else:
@@ -117,7 +146,7 @@ def run_free_mode(args):
         automation = ZeroBudgetReelsAutomation()
         automation.run_daily(posting_time=args.time)
     else:
-        print(f"Creating reel (free mode)...")
+        print("Creating reel (free mode)...")
         if args.topic:
             print(f"Topic: {args.topic}")
         if args.dry_run:
@@ -161,22 +190,23 @@ def run_paid_mode(args):
         automation = ReelsAutomation()
         automation.run_daily(posting_time=args.time)
     else:
-        print(f"Creating reel...")
+        print("Creating reel...")
         result = run_once(topic=args.topic, dry_run=args.dry_run)
         if not result["success"]:
             sys.exit(1)
 
 
 def print_zero_budget_setup():
+    """Print zero-budget setup instructions."""
     print("""
 ZERO BUDGET SETUP ($0/month)
-═════════════════════════════
+=============================
 
 1. GET FREE API KEYS (no credit card)
-   ├─ Groq:        https://console.groq.com  (1M tokens/day free)
-   ├─ Pexels:      https://www.pexels.com/api  (200 req/hour free)
-   ├─ Cloudflare:  https://dash.cloudflare.com/sign-up  (10GB R2 free)
-   └─ Instagram:   Convert to Business + Meta Developer  (25 posts/day free)
+   - Groq:        https://console.groq.com  (1M tokens/day free)
+   - Pexels:      https://www.pexels.com/api  (200 req/hour free)
+   - Cloudflare:  https://dash.cloudflare.com/sign-up  (10GB R2 free)
+   - Instagram:   Convert to Business + Meta Developer  (25 posts/day free)
 
 2. INSTALL
    pip install -r requirements.txt
@@ -193,16 +223,18 @@ ZERO BUDGET SETUP ($0/month)
 For detailed steps: see ZERO_BUDGET_SETUP.md
 """)
 
+
 def print_paid_setup():
+    """Print paid setup instructions."""
     print("""
 PAID SETUP (~$6-10/month)
-══════════════════════════
+==========================
 
 1. GET API KEYS
-   ├─ OpenAI:      https://platform.openai.com
-   ├─ ElevenLabs:  https://elevenlabs.io
-   ├─ Pexels:      https://www.pexels.com/api
-   └─ Instagram:   Meta Developer + Business Account
+   - OpenAI:      https://platform.openai.com
+   - ElevenLabs:  https://elevenlabs.io
+   - Pexels:      https://www.pexels.com/api
+   - Instagram:   Meta Developer + Business Account
 
 2. INSTALL
    pip install -r requirements.txt

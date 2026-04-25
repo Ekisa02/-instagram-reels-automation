@@ -38,7 +38,7 @@ class ZeroBudgetReelsAutomation:
         self.uploader = get_free_uploader()
         self.publisher = InstagramPublisher()
 
-        logger.info("ZeroBudgetReelsAutomation initialized — $0/month mode")
+        logger.info("ZeroBudgetReelsAutomation initialized - $0/month mode")
 
     def create_and_publish_reel(
         self,

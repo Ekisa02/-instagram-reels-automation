@@ -152,7 +152,7 @@ class ReelsAutomation:
             "",
             script.get("script", "")[:150] + "..." if len(script.get("script", "")) > 150 else script.get("script", ""),
             "",
-            script.get("cta", "Follow for daily tips! 👇"),
+            script.get("cta", "Follow for daily tips!"),
             "",
             " ".join(script.get("hashtags", ["#Reels", "#Viral", "#Tips"]))
         ]
@@ -195,7 +195,7 @@ def run_once(topic: Optional[str] = None, dry_run: bool = False):
     result = automation.create_and_publish_reel(topic=topic, dry_run=dry_run)
 
     if result["success"]:
-        print(f"\n✅ SUCCESS")
+        print(f"\nSUCCESS")
         print(f"Topic: {result['topic']}")
         print(f"Video: {result['video_path']}")
         if result['public_url']:
@@ -203,7 +203,7 @@ def run_once(topic: Optional[str] = None, dry_run: bool = False):
         if result['instagram_media_id']:
             print(f"Instagram Media ID: {result['instagram_media_id']}")
     else:
-        print(f"\n❌ FAILED: {result['error']}")
+        print(f"\nFAILED: {result['error']}")
 
     return result
 

@@ -38,20 +38,7 @@ class VoiceGenerator:
         style: float = 0.3,
         model: str = "eleven_multilingual_v2"
     ) -> Optional[Path]:
-        """
-        Generate voiceover from text.
-
-        Args:
-            text: Script text to convert to speech
-            output_filename: Output filename
-            stability: Voice stability (0-1)
-            similarity_boost: Similarity boost (0-1)
-            style: Style exaggeration (0-1)
-            model: ElevenLabs model ID
-
-        Returns:
-            Path to generated audio file or None
-        """
+        """Generate voiceover from text."""
         if not self.api_key:
             logger.error("Cannot generate voiceover: No API key")
             return None
@@ -97,7 +84,7 @@ class VoiceGenerator:
             return None
 
     def get_voice_duration(self, audio_path: Path) -> float:
-        """Get duration of audio file in seconds using ffprobe via moviepy."""
+        """Get duration of audio file in seconds."""
         try:
             # MoviePy 2.x compatible
             try:
