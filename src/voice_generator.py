@@ -99,7 +99,12 @@ class VoiceGenerator:
     def get_voice_duration(self, audio_path: Path) -> float:
         """Get duration of audio file in seconds using ffprobe via moviepy."""
         try:
-            from moviepy.editor import AudioFileClip
+            # MoviePy 2.x compatible
+            try:
+                from moviepy import AudioFileClip
+            except ImportError:
+                from moviepy.editor import AudioFileClip
+
             with AudioFileClip(str(audio_path)) as audio:
                 return audio.duration
         except Exception as e:

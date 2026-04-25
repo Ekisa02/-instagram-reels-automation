@@ -358,4 +358,3 @@ This tool is for **original content creation only**. The creator is not responsi
 - Misleading claims about income potential
 
 The "₹750,000/month" claim from viral posts is unrealistic for 99% of accounts. Building a real audience takes 6-12 months of consistent, valuable content.
-# -instagram-reels-automation

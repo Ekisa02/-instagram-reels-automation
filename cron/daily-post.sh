@@ -31,8 +31,8 @@ fi
 echo "========================================" >> "$LOG_FILE"
 
 # Optional: Send notification on failure
- if [ $EXIT_CODE -ne 0 ]; then
-     curl -X POST "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"       -H 'Content-type: application/json'          --data '{"text":"Instagram Reels automation failed!"}'
- fi
+# if [ $EXIT_CODE -ne 0 ]; then
+#     curl -X POST "https://hooks.slack.com/services/YOUR/WEBHOOK/URL" #         -H 'Content-type: application/json' #         --data '{"text":"Instagram Reels automation failed!"}'
+# fi
 
 exit $EXIT_CODE

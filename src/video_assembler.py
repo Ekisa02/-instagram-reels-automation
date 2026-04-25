@@ -5,11 +5,23 @@ from typing import List, Dict, Optional
 from pathlib import Path
 from loguru import logger
 
-from moviepy.editor import (
-    VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip,
-    concatenate_videoclips, ColorClip, CompositeAudioClip
-)
-from moviepy.video.fx.all import fadein, fadeout
+# MoviePy 2.x imports (new API)
+try:
+    # MoviePy 2.x
+    from moviepy import (
+        VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip,
+        concatenate_videoclips, ColorClip
+    )
+    from moviepy import fadein, fadeout
+    MOVIEPY_VERSION = 2
+except ImportError:
+    # MoviePy 1.x fallback
+    from moviepy.editor import (
+        VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip,
+        concatenate_videoclips, ColorClip
+    )
+    from moviepy.video.fx.all import fadein, fadeout
+    MOVIEPY_VERSION = 1
 
 from src.config import (
     VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_FPS, 
@@ -69,7 +81,7 @@ class VideoAssembler:
             b_roll = self._build_b_roll(stock_clips, target_duration)
 
             # Add voiceover
-            b_roll = b_roll.set_audio(voiceover)
+            b_roll = b_roll.with_audio(voiceover)
 
             # Generate caption overlays
             caption_clips = self._generate_captions(
@@ -100,8 +112,8 @@ class VideoAssembler:
                 layers.append(cta_clip)
 
             final = CompositeVideoClip(layers, size=(self.width, self.height))
-            final = final.set_duration(target_duration)
-            final = final.set_fps(self.fps)
+            final = final.with_duration(target_duration)
+            final = final.with_fps(self.fps)
 
             # Add subtle background music if available
             if add_background_music:
@@ -114,9 +126,9 @@ class VideoAssembler:
                 codec=VIDEO_CODEC,
                 audio_codec=AUDIO_CODEC,
                 fps=self.fps,
-                preset="fast",  # Use "slow" for better quality in production
+                preset="fast",
                 threads=4,
-                logger=None  # MoviePy logger is noisy
+                logger=None
             )
 
             # Clean up clips
@@ -133,15 +145,14 @@ class VideoAssembler:
             logger.error(f"Video assembly failed: {e}")
             raise
 
-    def _build_b_roll(self, stock_clips: List[Path], target_duration: float) -> VideoFileClip:
+    def _build_b_roll(self, stock_clips: List[Path], target_duration: float):
         """Build B-roll sequence from stock clips."""
         if not stock_clips:
-            # Fallback: solid color background
             logger.warning("No stock clips provided, using fallback background")
             return ColorClip(
                 size=(self.width, self.height),
-                color=(15, 15, 20)  # Dark charcoal
-            ).set_duration(target_duration)
+                color=(15, 15, 20)
+            ).with_duration(target_duration)
 
         processed_clips = []
         clip_duration = target_duration / len(stock_clips)
@@ -155,12 +166,11 @@ class VideoAssembler:
 
                 # Trim or loop to exact duration needed
                 if clip.duration > clip_duration:
-                    clip = clip.subclip(0, clip_duration)
+                    clip = clip.subclipped(0, clip_duration)
                 elif clip.duration < clip_duration:
-                    # Loop if too short
                     n_loops = int(clip_duration / clip.duration) + 1
                     clip = concatenate_videoclips([clip] * n_loops)
-                    clip = clip.subclip(0, clip_duration)
+                    clip = clip.subclipped(0, clip_duration)
 
                 # Add subtle fade transitions
                 clip = fadein(clip, 0.5)
@@ -176,32 +186,24 @@ class VideoAssembler:
             return ColorClip(
                 size=(self.width, self.height),
                 color=(15, 15, 20)
-            ).set_duration(target_duration)
+            ).with_duration(target_duration)
 
-        # Concatenate all clips
         final_b_roll = concatenate_videoclips(processed_clips, method="compose")
 
         # Ensure exact duration
         if final_b_roll.duration > target_duration:
-            final_b_roll = final_b_roll.subclip(0, target_duration)
+            final_b_roll = final_b_roll.subclipped(0, target_duration)
         elif final_b_roll.duration < target_duration:
-            # Extend last frame
             last_frame = final_b_roll.to_ImageClip(final_b_roll.duration - 0.1)
-            last_frame = last_frame.set_duration(target_duration - final_b_roll.duration)
+            last_frame = last_frame.with_duration(target_duration - final_b_roll.duration)
             final_b_roll = concatenate_videoclips([final_b_roll, last_frame])
 
         return final_b_roll
 
-    def _resize_to_fill(
-        self, 
-        clip: VideoFileClip, 
-        target_w: int, 
-        target_h: int
-    ) -> VideoFileClip:
+    def _resize_to_fill(self, clip, target_w: int, target_h: int):
         """Resize clip to fill target dimensions (crop if necessary)."""
         clip_w, clip_h = clip.size
 
-        # Calculate scale factors
         scale_w = target_w / clip_w
         scale_h = target_h / clip_h
         scale = max(scale_w, scale_h)
@@ -209,23 +211,17 @@ class VideoAssembler:
         new_w = int(clip_w * scale)
         new_h = int(clip_h * scale)
 
-        clip = clip.resize(newsize=(new_w, new_h))
+        clip = clip.resized(newsize=(new_w, new_h))
 
-        # Center crop
         x_center = new_w // 2
         y_center = new_h // 2
         x1 = x_center - target_w // 2
         y1 = y_center - target_h // 2
 
-        clip = clip.crop(x1=x1, y1=y1, width=target_w, height=target_h)
+        clip = clip.cropped(x1=x1, y1=y1, width=target_w, height=target_h)
         return clip
 
-    def _generate_captions(
-        self, 
-        captions: List[str], 
-        hook: str,
-        total_duration: float
-    ) -> List[TextClip]:
+    def _generate_captions(self, captions: List[str], hook: str, total_duration: float):
         """Generate animated caption text overlays."""
         if not captions:
             return []
@@ -233,7 +229,6 @@ class VideoAssembler:
         caption_clips = []
         segment_duration = total_duration / (len(captions) + 1)
 
-        # Style configuration
         font_size = 72
         stroke_width = 3
 
@@ -241,7 +236,6 @@ class VideoAssembler:
             start_time = (i + 1) * segment_duration
             duration = segment_duration
 
-            # Main caption text
             txt_clip = TextClip(
                 text.upper(),
                 fontsize=font_size,
@@ -255,12 +249,9 @@ class VideoAssembler:
                 interline=-10
             )
 
-            # Position in lower third
-            txt_clip = txt_clip.set_position(("center", self.height - 400))
-            txt_clip = txt_clip.set_start(start_time).set_duration(duration)
+            txt_clip = txt_clip.with_position(("center", self.height - 400))
+            txt_clip = txt_clip.with_start(start_time).with_duration(duration)
 
-            # Add pop-in effect by scaling (simulated with size changes)
-            # MoviePy doesn't support easy scale animation, so we use fade
             txt_clip = fadein(txt_clip, 0.2)
             txt_clip = fadeout(txt_clip, 0.2)
 
@@ -268,19 +259,18 @@ class VideoAssembler:
 
         return caption_clips
 
-    def _create_hook_overlay(self, hook_text: str, duration: float) -> Optional[TextClip]:
+    def _create_hook_overlay(self, hook_text: str, duration: float):
         """Create attention-grabbing hook overlay for first few seconds."""
         if not hook_text or duration <= 0:
             return None
 
-        # Split hook into words for dramatic effect
-        words = hook_text.split()[:6]  # Max 6 words
+        words = hook_text.split()[:6]
         display_text = " ".join(words).upper()
 
         hook_clip = TextClip(
             display_text,
             fontsize=90,
-            color="#FFD700",  # Gold color for attention
+            color="#FFD700",
             stroke_color="black",
             stroke_width=4,
             font="Arial-Bold",
@@ -289,19 +279,14 @@ class VideoAssembler:
             align="center"
         )
 
-        hook_clip = hook_clip.set_position("center")
-        hook_clip = hook_clip.set_start(0).set_duration(duration)
+        hook_clip = hook_clip.with_position("center")
+        hook_clip = hook_clip.with_start(0).with_duration(duration)
         hook_clip = fadein(hook_clip, 0.3)
         hook_clip = fadeout(hook_clip, 0.5)
 
         return hook_clip
 
-    def _create_cta_overlay(
-        self, 
-        cta_text: str, 
-        start_time: float, 
-        duration: float
-    ) -> Optional[TextClip]:
+    def _create_cta_overlay(self, cta_text: str, start_time: float, duration: float):
         """Create call-to-action overlay for end of video."""
         if not cta_text or duration <= 0:
             return None
@@ -318,26 +303,18 @@ class VideoAssembler:
             align="center"
         )
 
-        # Position above center
-        cta_clip = cta_clip.set_position(("center", self.height // 2 - 100))
-        cta_clip = cta_clip.set_start(start_time).set_duration(duration)
+        cta_clip = cta_clip.with_position(("center", self.height // 2 - 100))
+        cta_clip = cta_clip.with_start(start_time).with_duration(duration)
         cta_clip = fadein(cta_clip, 0.5)
 
         return cta_clip
 
-    def _add_background_music(
-        self, 
-        video_clip: CompositeVideoClip, 
-        volume: float
-    ) -> CompositeVideoClip:
-        """Add subtle background music (placeholder implementation)."""
-        # In production, you would load a royalty-free music file
-        # For now, this is a stub that returns the original clip
+    def _add_background_music(self, video_clip, volume: float):
+        """Add subtle background music (placeholder)."""
         logger.info("Background music placeholder (no music file provided)")
         return video_clip
 
 
 if __name__ == "__main__":
-    # Test with dummy data
     assembler = VideoAssembler()
     print("VideoAssembler initialized successfully")
