@@ -1,0 +1,25 @@
+# Core
+requests>=2.31.0
+moviepy>=1.0.3
+Pillow>=10.0.0
+python-dotenv>=1.0.0
+schedule>=1.2.0
+httpx>=0.25.0
+pydantic>=2.0.0
+loguru>=0.7.0
+
+# AI Script Generation (FREE alternatives — pick one or both)
+groq>=0.9.0              # Free: 1M tokens/day, no credit card
+google-generativeai>=0.7.0  # Free: 60 req/min, no credit card
+
+# Voice Generation (FREE)
+edge-tts>=6.1.0          # Free: Microsoft Edge TTS, unlimited, no key
+
+# Optional: ElevenLabs free tier (10k chars/month)
+# elevenlabs>=0.28.0     # Uncomment if you have free credits
+
+# Cloud Storage (Cloudflare R2 — free 10GB/month)
+boto3>=1.34.0            # Required for R2 (S3-compatible)
+
+# OpenAI (PAID — only if you have budget)
+# openai>=1.0.0          # Uncomment if you upgrade later

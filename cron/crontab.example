@@ -1,0 +1,11 @@
+# Instagram Reels Automation Cron Jobs
+# Edit with: crontab -e
+
+# Post daily at 9:00 AM
+0 9 * * * cd /path/to/instagram-reels-automation && ./cron/daily-post.sh
+
+# Alternative: Post at 9 AM and 6 PM for 2x daily
+0 9,18 * * * cd /path/to/instagram-reels-automation && ./cron/daily-post.sh
+
+# Post every Monday, Wednesday, Friday at 10 AM
+0 10 * * 1,3,5 cd /path/to/instagram-reels-automation && ./cron/daily-post.sh

@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  reels-automation:
+    build: .
+    container_name: instagram-reels-bot
+    env_file:
+      - .env
+    volumes:
+      - ./assets/output:/app/assets/output
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    # For daily scheduled runs, override command:
+    # command: python main.py --daily --time 09:00
+    command: python main.py --dry-run
+    restart: unless-stopped
+
+  # Optional: Use cron instead of keeping container running
+  reels-cron:
+    build: .
+    container_name: instagram-reels-cron
+    env_file:
+      - .env
+    volumes:
+      - ./assets/output:/app/assets/output
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+      - ./cron/daily-post.sh:/app/daily-post.sh:ro
+    command: cron -f
+    restart: unless-stopped
+    profiles:
+      - cron
