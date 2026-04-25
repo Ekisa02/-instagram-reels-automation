@@ -5,23 +5,11 @@ from typing import List, Dict, Optional
 from pathlib import Path
 from loguru import logger
 
-# MoviePy 2.x imports (new API)
-try:
-    # MoviePy 2.x
-    from moviepy import (
-        VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip,
-        concatenate_videoclips, ColorClip
-    )
-    from moviepy import fadein, fadeout
-    MOVIEPY_VERSION = 2
-except ImportError:
-    # MoviePy 1.x fallback
-    from moviepy.editor import (
-        VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip,
-        concatenate_videoclips, ColorClip
-    )
-    from moviepy.video.fx.all import fadein, fadeout
-    MOVIEPY_VERSION = 1
+from moviepy import (
+    VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip,
+    concatenate_videoclips, ColorClip
+)
+from moviepy.video.fx import FadeIn, FadeOut
 
 from src.config import (
     VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_FPS, 
@@ -51,20 +39,7 @@ class VideoAssembler:
         add_background_music: bool = False,
         music_volume: float = 0.15
     ) -> Path:
-        """
-        Assemble complete Reel from components.
-
-        Args:
-            script_data: Dictionary with captions, hook, etc.
-            stock_clips: List of downloaded stock video paths
-            voiceover_path: Path to AI-generated voiceover MP3
-            output_filename: Optional output filename
-            add_background_music: Whether to add subtle background music
-            music_volume: Background music volume (0-1)
-
-        Returns:
-            Path to final video file
-        """
+        """Assemble complete Reel from components."""
         if not output_filename:
             output_filename = f"reel_{random.randint(10000, 99999)}.mp4"
 
@@ -172,9 +147,8 @@ class VideoAssembler:
                     clip = concatenate_videoclips([clip] * n_loops)
                     clip = clip.subclipped(0, clip_duration)
 
-                # Add subtle fade transitions
-                clip = fadein(clip, 0.5)
-                clip = fadeout(clip, 0.5)
+                # Add fade effects using MoviePy 2.x API
+                clip = clip.with_effects([FadeIn(0.5), FadeOut(0.5)])
 
                 processed_clips.append(clip)
 
@@ -252,8 +226,8 @@ class VideoAssembler:
             txt_clip = txt_clip.with_position(("center", self.height - 400))
             txt_clip = txt_clip.with_start(start_time).with_duration(duration)
 
-            txt_clip = fadein(txt_clip, 0.2)
-            txt_clip = fadeout(txt_clip, 0.2)
+            # Fade effects for captions
+            txt_clip = txt_clip.with_effects([FadeIn(0.2), FadeOut(0.2)])
 
             caption_clips.append(txt_clip)
 
@@ -281,8 +255,7 @@ class VideoAssembler:
 
         hook_clip = hook_clip.with_position("center")
         hook_clip = hook_clip.with_start(0).with_duration(duration)
-        hook_clip = fadein(hook_clip, 0.3)
-        hook_clip = fadeout(hook_clip, 0.5)
+        hook_clip = hook_clip.with_effects([FadeIn(0.3), FadeOut(0.5)])
 
         return hook_clip
 
@@ -305,7 +278,7 @@ class VideoAssembler:
 
         cta_clip = cta_clip.with_position(("center", self.height // 2 - 100))
         cta_clip = cta_clip.with_start(start_time).with_duration(duration)
-        cta_clip = fadein(cta_clip, 0.5)
+        cta_clip = cta_clip.with_effects([FadeIn(0.5)])
 
         return cta_clip
 
